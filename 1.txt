@@ -1,0 +1,51 @@
+SELECT
+    sys_connect_by_path(
+        concat(
+            entityid,
+            concat(
+                entitytype,
+                nvl(dispensableresearchoption,'')
+            )
+        ),
+        '.'
+    ) flowsheetcategoryhierachypath,
+    collapsed,
+    id c1,
+    practice c2,
+    patient c3,
+    name c4,
+    fcparent c5,
+    entityid c6,
+    entitytype c7,
+    hidden c8,
+    entitytype,
+    dispensableresearchoption
+FROM
+    flowsheet_category fc
+WHERE
+    EXISTS (
+        SELECT
+            1
+        FROM
+            flowsheet_category fc1
+        WHERE
+                fc1.id = fc.id
+            AND
+                fc.id <> 69582227
+        START WITH
+            id = 69582227
+        CONNECT BY
+            PRIOR id = fcparent
+    )
+START WITH
+    fc.practice = 3283
+AND
+    fc.patient = 1653160
+AND
+    fcparent IS NULL
+CONNECT BY
+    PRIOR id = fcparent
+ORDER BY
+    nvl(fc.level0seqno,-1),
+    nvl(fc.level1seqno,-1),
+    nvl(fc.level2seqno,-1);
